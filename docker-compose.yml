@@ -1,0 +1,31 @@
+---
+version: '2'
+
+services:
+  dnsmasq:
+    image: mhiro2/rpi-dnsmasq
+    container_name: dnsmasq
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "192.168.0.100:53:53/udp"
+    volumes:
+      - ${PWD}/etc/dnsmasq.conf:/etc/dnsmasq.conf:ro
+      - ${PWD}/etc/dnsmasq.resolv.conf:/etc/dnsmasq.resolv.conf:ro
+      - ${PWD}/etc/hosts.dnsmasq:/etc/hosts.dnsmasq:ro
+      - ${PWD}/etc/dnsmasq.d:/etc/dnsmasq.d:ro
+    labels:
+      com.dnsdock.alias: "dnsmasq.rpi.docker"
+    restart: always
+    network_mode: "bridge"
+
+  dnsdock:
+    image: ailispaw/dnsdock:armhf
+    container_name: dnsdock
+    command: --domain="rpi.docker"
+    ports:
+      - "172.17.0.1:53:53/udp"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    network_mode: "bridge"
